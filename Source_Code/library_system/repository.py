@@ -154,11 +154,15 @@ class SQLRepository:
             for row in self.connection.execute(sql, values).fetchall()
         ]
 
-    def count_open_loans(self, member_id: str) -> int:
-        return self.connection.execute(
-            "SELECT COUNT(*) FROM loans WHERE member_id = ? AND returned = 0",
-            (member_id,),
-        ).fetchone()[0]
+    def count_open_loans(
+        self, member_id: str, item_type: ItemType | None = None
+    ) -> int:
+        sql = "SELECT COUNT(*) FROM loans WHERE member_id = ? AND returned = 0"
+        values: tuple[Any, ...] = (member_id,)
+        if item_type is not None:
+            sql += " AND item_type = ?"
+            values += (item_type.value,)
+        return self.connection.execute(sql, values).fetchone()[0]
 
     def count_open_loans_for_item(self, item_type: ItemType, item_id: int) -> int:
         return self.connection.execute(

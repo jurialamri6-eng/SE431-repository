@@ -1,0 +1,12 @@
+[BOOK]
+# These values reflect the supplied library rules.
+maximum_open_loans = 3
+loan_days = 14
+fine_per_overdue_day = 1
+
+[EQUIPMENT]
+# Demonstration values only: the course handout does not define equipment policy.
+# Replace these with the university's approved equipment rules before real use.
+maximum_open_loans = 1
+loan_days = 7
+fine_per_overdue_day = 0

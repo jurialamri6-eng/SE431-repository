@@ -64,7 +64,7 @@ class LendingService:
             if item_failure:
                 return BorrowOutcome(False, item_failure)
 
-            if self.storage.count_open_loans(member_id) >= policy.maximum_open_loans:
+            if self.storage.count_open_loans(member_id, item_type) >= policy.maximum_open_loans:
                 return BorrowOutcome(False, "Borrowing limit reached")
 
             borrowed_at = self.clock()
