@@ -47,70 +47,79 @@ def seed_demo(storage) -> None:
 def _show_items(items: list[BorrowableItem]) -> None:
     for item in items:
         print(
-            f"{item.item_type.value} {item.item_id}: {item.name} — {item.creator} "
+            f"{item.item_id} {item.name} - {item.creator} "
             f"Available: {item.available_copies}/{item.total_copies}"
         )
 
 
-def _read_item_type() -> ItemType:
-    raw = input("Item type (book/equipment): ").strip().upper()
-    if raw.startswith("E"):
-        return ItemType.EQUIPMENT
-    if raw.startswith("B"):
-        return ItemType.BOOK
-    raise ValueError("Choose 'book' or 'equipment'.")
+def _handle_search(service: LendingService, item_type: ItemType) -> None:
+    _show_items(service.search(input("Search: "), item_type))
 
 
-def run(engine: str, database: str) -> None:
-    storage = open_storage(engine, database)
-    storage.create_schema()
-    seed_demo(storage)
-    service = LendingService(storage, load_policies())
+def _handle_borrow(service: LendingService, item_type: ItemType) -> None:
+    member_id = input("Member ID: ").strip()
+    label = item_type.value.title()
     try:
+        item_id = int(input(f"{label} ID: "))
+    except ValueError:
+        print(f"Invalid {label.lower()} ID")
+        return
+    outcome = service.borrow(member_id, item_type, item_id)
+    if outcome.success and outcome.loan:
+        print(f"{outcome.message} (loan #{outcome.loan.loan_id})")
+    else:
+        print(outcome.message)
+
+
+def _handle_return(service: LendingService, item_type: ItemType) -> None:
+    member_id = input("Member ID: ").strip()
+    label = item_type.value.title()
+    try:
+        item_id = int(input(f"{label} ID: "))
+    except ValueError:
+        print(f"Invalid {label.lower()} ID")
+        return
+    active = service.list_open_loans(member_id, item_type, item_id)
+    if not active:
+        print("Active loan not found")
+        return
+    for loan in active:
+        print(f"Loan #{loan.loan_id} due {loan.due_at.isoformat()}")
+    try:
+        selected = int(input("Loan ID to return: "))
+    except ValueError:
+        print("Invalid loan ID")
+        return
+    outcome = service.return_item(member_id, item_type, item_id, selected)
+    print(outcome.message)
+    if outcome.success and outcome.fine:
+        print("Fine:", outcome.fine)
+
+
+def run(engine: str, database: str, item_type: ItemType = ItemType.BOOK) -> None:
+    storage = open_storage(engine, database)
+    equipment_mode = item_type is ItemType.EQUIPMENT
+    search_label = "equipment" if equipment_mode else "books"
+    loan_label = "equipment" if equipment_mode else "a book"
+    try:
+        storage.create_schema()
+        seed_demo(storage)
+        service = LendingService(storage, load_policies())
+        handlers = {"1": _handle_search, "2": _handle_borrow, "3": _handle_return}
         while True:
             print("\nLIBRARY")
-            print("1 Search")
-            print("2 Borrow")
-            print("3 Return")
+            print(f"1 Search {search_label}")
+            print(f"2 Borrow {loan_label}")
+            print(f"3 Return {loan_label}")
             print("4 Exit")
             choice = input("Choice: ").strip()
-            if choice == "1":
-                _show_items(service.search(input("Search: ")))
-            elif choice == "2":
-                member_id = input("Member ID: ").strip()
-                try:
-                    item_type = _read_item_type()
-                    item_id = int(input("Item ID: "))
-                except ValueError:
-                    print("Invalid item type or ID")
-                    continue
-                outcome = service.borrow(member_id, item_type, item_id)
-                print(outcome.message)
-                if outcome.success and outcome.loan:
-                    print(f"Loan ID: {outcome.loan.loan_id}")
-            elif choice == "3":
-                member_id = input("Member ID: ").strip()
-                try:
-                    item_type = _read_item_type()
-                    item_id = int(input("Item ID: "))
-                except ValueError:
-                    print("Invalid item type or ID")
-                    continue
-                active = service.list_open_loans(member_id, item_type, item_id)
-                if not active:
-                    print("Active loan not found")
-                    continue
-                for loan in active:
-                    print(f"Loan #{loan.loan_id} due {loan.due_at.isoformat()}")
-                selected = int(input("Loan ID to return: "))
-                outcome = service.return_item(member_id, item_type, item_id, selected)
-                print(outcome.message)
-                if outcome.success and outcome.fine:
-                    print("Fine:", outcome.fine)
-            elif choice == "4":
+            if choice == "4":
                 break
-            else:
+            action = handlers.get(choice)
+            if action is None:
                 print("Invalid choice")
+                continue
+            action(service, item_type)
     finally:
         storage.close()
 
@@ -119,6 +128,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="SE431 reengineered lending system")
     parser.add_argument("--engine", choices=("sqlite", "duckdb"), default="sqlite")
     parser.add_argument("--database", default="library.sqlite3")
+    parser.add_argument("--item-type", choices=("book", "equipment"), default="book")
     args = parser.parse_args()
     Path(args.database).parent.mkdir(parents=True, exist_ok=True)
-    run(args.engine, args.database)
+    run(args.engine, args.database, ItemType[args.item_type.upper()])

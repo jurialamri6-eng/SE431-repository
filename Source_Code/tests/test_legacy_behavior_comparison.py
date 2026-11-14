@@ -2,7 +2,11 @@ from __future__ import annotations
 
 import contextlib
 import io
+import os
+import re
 import sqlite3
+import subprocess
+import sys
 import tempfile
 import unittest
 from datetime import datetime, timedelta
@@ -24,6 +28,41 @@ class FrozenDateTime(datetime):
 
 
 class LegacyCompatibilityTests(unittest.TestCase):
+    def test_book_console_preserves_post_maintenance_dialogue(self) -> None:
+        source_dir = Path(__file__).resolve().parents[1]
+        inputs = "\n".join(
+            ["1", "Clean Code", "2", "S1", "1", "2", "S1", "1", "2", "S1", "1",
+             "3", "S1", "1", "1", "1", "Clean Code", "4", ""]
+        )
+        env = {**os.environ, "PYTHONIOENCODING": "utf-8"}
+        with tempfile.TemporaryDirectory() as directory:
+            for engine in ("sqlite", "duckdb"):
+                with self.subTest(engine=engine):
+                    transcripts = []
+                    for module, filename in (
+                        ("pre_refactor_system", "before"),
+                        ("library_system", "after"),
+                    ):
+                        path = Path(directory) / f"{filename}.{engine}"
+                        result = subprocess.run(
+                            [sys.executable, "-m", module, "--engine", engine,
+                             "--database", str(path)],
+                            cwd=source_dir, input=inputs, capture_output=True,
+                            check=True, encoding="utf-8", env=env, timeout=25,
+                        )
+                        # Each process creates its own deadlines from the wall clock.
+                        transcript = re.sub(
+                            r"(Loan #\d+ due \d{4}-\d{2}-\d{2})T[\d:.]+",
+                            r"\1", result.stdout,
+                        )
+                        transcripts.append(transcript)
+                    self.assertEqual(transcripts[0], transcripts[1])
+                    for expected in (
+                        "Available: 2/2", "loan #1", "loan #2", "Book is unavailable",
+                        "Book returned", "Available: 1/2",
+                    ):
+                        self.assertIn(expected, transcripts[1])
+
     def test_single_copy_borrow_search_due_date_and_fine_are_preserved(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             source_path = Path(directory) / "legacy.sqlite3"

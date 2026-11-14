@@ -16,6 +16,18 @@ class SQLRepository:
     def __init__(self, connection: Any) -> None:
         self.connection = connection
 
+    def _fetch_one(self, sql: str, parameters: tuple[Any, ...] = ()) -> dict[str, Any] | None:
+        cursor = self.connection.execute(sql, parameters)
+        row = cursor.fetchone()
+        if row is None:
+            return None
+        return dict(zip((column[0] for column in cursor.description), row))
+
+    def _fetch_all(self, sql: str, parameters: tuple[Any, ...] = ()) -> list[dict[str, Any]]:
+        cursor = self.connection.execute(sql, parameters)
+        names = [column[0] for column in cursor.description]
+        return [dict(zip(names, row)) for row in cursor.fetchall()]
+
     @contextmanager
     def transaction(self) -> Iterator[None]:
         self.connection.execute(self.begin_statement)
@@ -84,46 +96,46 @@ class SQLRepository:
         )
 
     def get_member(self, member_id: str) -> Member | None:
-        row = self.connection.execute(
+        row = self._fetch_one(
             "SELECT id, name, status FROM members WHERE id = ?", (member_id,)
-        ).fetchone()
-        return Member(*row) if row else None
+        )
+        return Member(row["id"], row["name"], row["status"]) if row else None
 
     @staticmethod
-    def _item(row: tuple[Any, ...] | None) -> BorrowableItem | None:
+    def _item(row: dict[str, Any] | None) -> BorrowableItem | None:
         if row is None:
             return None
         return BorrowableItem(
-            item_id=row[1],
-            item_type=ItemType(row[0]),
-            name=row[2],
-            creator=row[3],
-            total_copies=row[4],
-            available_copies=row[5],
+            item_id=row["item_id"],
+            item_type=ItemType(row["item_type"]),
+            name=row["name"],
+            creator=row["creator"],
+            total_copies=row["total_copies"],
+            available_copies=row["available_copies"],
         )
 
     @staticmethod
-    def _loan(row: tuple[Any, ...] | None) -> Loan | None:
+    def _loan(row: dict[str, Any] | None) -> Loan | None:
         if row is None:
             return None
         from datetime import datetime
 
         return Loan(
-            loan_id=row[0],
-            member_id=row[1],
-            item_type=ItemType(row[2]),
-            item_id=row[3],
-            borrowed_at=datetime.fromisoformat(row[4]),
-            due_at=datetime.fromisoformat(row[5]),
-            returned=bool(row[6]),
+            loan_id=row["id"],
+            member_id=row["member_id"],
+            item_type=ItemType(row["item_type"]),
+            item_id=row["item_id"],
+            borrowed_at=datetime.fromisoformat(row["borrow_date"]),
+            due_at=datetime.fromisoformat(row["due_date"]),
+            returned=bool(row["returned"]),
         )
 
     def get_item(self, item_type: ItemType, item_id: int) -> BorrowableItem | None:
-        row = self.connection.execute(
+        row = self._fetch_one(
             """SELECT item_type, item_id, name, creator, total_copies, available_copies
                FROM items WHERE item_type = ? AND item_id = ?""",
             (item_type.value, item_id),
-        ).fetchone()
+        )
         return self._item(row)
 
     def search_items(
@@ -138,7 +150,7 @@ class SQLRepository:
             sql += " AND item_type = ?"
             values += (item_type.value,)
         sql += " ORDER BY item_type, item_id"
-        rows = self.connection.execute(sql, values).fetchall()
+        rows = self._fetch_all(sql, values)
         return [self._item(row) for row in rows if row is not None]
 
     def list_items(self, item_type: ItemType | None = None) -> list[BorrowableItem]:
@@ -149,54 +161,51 @@ class SQLRepository:
             sql += " WHERE item_type = ?"
             values = (item_type.value,)
         sql += " ORDER BY item_type, item_id"
-        return [
-            self._item(row)
-            for row in self.connection.execute(sql, values).fetchall()
-        ]
+        return [self._item(row) for row in self._fetch_all(sql, values)]
 
     def count_open_loans(
         self, member_id: str, item_type: ItemType | None = None
     ) -> int:
-        sql = "SELECT COUNT(*) FROM loans WHERE member_id = ? AND returned = 0"
+        sql = "SELECT COUNT(*) AS count FROM loans WHERE member_id = ? AND returned = 0"
         values: tuple[Any, ...] = (member_id,)
         if item_type is not None:
             sql += " AND item_type = ?"
             values += (item_type.value,)
-        return self.connection.execute(sql, values).fetchone()[0]
+        return self._fetch_one(sql, values)["count"]
 
     def count_open_loans_for_item(self, item_type: ItemType, item_id: int) -> int:
-        return self.connection.execute(
-            """SELECT COUNT(*) FROM loans
+        return self._fetch_one(
+            """SELECT COUNT(*) AS count FROM loans
                WHERE item_type = ? AND item_id = ? AND returned = 0""",
             (item_type.value, item_id),
-        ).fetchone()[0]
+        )["count"]
 
     def open_loans(
         self, member_id: str, item_type: ItemType, item_id: int
     ) -> list[Loan]:
-        rows = self.connection.execute(
+        rows = self._fetch_all(
             """SELECT id, member_id, item_type, item_id, borrow_date, due_date, returned
                FROM loans
                WHERE member_id = ? AND item_type = ? AND item_id = ? AND returned = 0
                ORDER BY due_date, id""",
             (member_id, item_type.value, item_id),
-        ).fetchall()
+        )
         return [self._loan(row) for row in rows if row is not None]
 
     def get_open_loan(self, loan_id: int) -> Loan | None:
-        row = self.connection.execute(
+        row = self._fetch_one(
             """SELECT id, member_id, item_type, item_id, borrow_date, due_date, returned
                FROM loans WHERE id = ? AND returned = 0""",
             (loan_id,),
-        ).fetchone()
+        )
         return self._loan(row)
 
     def create_loan(
         self, member_id: str, item: BorrowableItem, borrowed_at, due_at
     ) -> Loan:
-        loan_id = self.connection.execute(
-            "SELECT COALESCE(MAX(id), 0) + 1 FROM loans"
-        ).fetchone()[0]
+        loan_id = self._fetch_one(
+            "SELECT COALESCE(MAX(id), 0) + 1 AS next_id FROM loans"
+        )["next_id"]
         self.connection.execute(
             """INSERT INTO loans
                (id, member_id, item_type, item_id, borrow_date, due_date, returned)
@@ -263,7 +272,7 @@ class SQLRepository:
 
     def counts(self) -> dict[str, int]:
         return {
-            name: self.connection.execute(f"SELECT COUNT(*) FROM {name}").fetchone()[0]
+            name: self._fetch_one(f"SELECT COUNT(*) AS count FROM {name}")["count"]
             for name in ("members", "items", "loans")
         }
 

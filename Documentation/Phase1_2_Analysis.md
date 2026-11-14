@@ -1,6 +1,6 @@
 # SE431 — Program Comprehension and Maintenance Design
 
-**Status:** Analysis of the supplied legacy source; MR-01/MR-02 sections are proposed designs until implementation and evidence are added.
+**Status:** Static analysis of the supplied legacy source plus implemented MR-01/MR-02 maintenance. The source text is preserved unchanged; the runnable normalized copy, final implementation, migrations, and tests are separate project artifacts.
 
 ## Scope and method
 
@@ -62,7 +62,7 @@ Other concerns include unhandled input/date/database errors, no explicit rollbac
 
 ## Phase 2: maintenance design
 
-### MR-01 — Multiple copies
+### MR-01 — Multiple copies (implemented bonus)
 
 **Classification:** perfective maintenance in the traditional taxonomy; additive maintenance describes the new functionality in SWEBOK V4.0a [6], [7].
 
@@ -72,13 +72,19 @@ For legacy migration, a clean single-copy record can map to one total copy when 
 
 **Impact:** `setup()`/schema, catalogue search/display, borrowing, returning, menu input, and the books/loans tables. Members and the three-loan limit remain unchanged. Acceptance cases include exhausting two copies, restoring exactly one on return, a duplicate return, repeated-title loans, inactive members, member-limit rejection, transaction failure, and competing requests for the last copy.
 
-### MR-02 — Replace the database implementation
+**Implemented design:** `items` stores `total_copies` and `available_copies`; `loans` identifies each borrowed item and member. `LendingService` applies the configured policy and keeps the loan and stock update in one storage transaction. A return selects an active `loan_id` when one member has multiple loans for the same item. Tests cover exhaustion, restoration, duplicate return, repeated titles, transaction rollback, and simultaneous requests for the last copy. See `Source_Code/library_system/` and Git commit `cec6910`.
+
+### MR-02 — Replace the database implementation (implemented bonus)
 
 **Classification:** adaptive maintenance: storage changes while required business behaviour stays the same [6].
 
 Introduce a storage boundary that returns named records and owns SQL, value mapping, connection lifecycle, and transactions. Keep membership, loan limits, due dates, fines, and search semantics in the application/domain layer. Select one adapter at startup; do not dual-write. The complete read-check-update operation, including the member's active-loan count, belongs inside one transaction. Migration should pause writes, back up the source, preserve identifiers/dates/returned flags, validate row counts and references, and keep the old database available until the new one is accepted. Search matching and wildcard behaviour are part of the contract [2], [8], [9].
 
 **Impact:** initialization/configuration, search, borrow, return, menu construction, and every table. Adapter acceptance checks run the same controlled searches, lending, returning, late-fine, limit, and failure scenarios against each engine, comparing returned data and resulting state.
+
+**Implemented design:** SQLite is retained as one real engine and DuckDB is the alternate engine selected with `--engine`. A shared storage protocol and SQL repository return named records; SQLite uses `BEGIN IMMEDIATE`, while DuckDB transactions are serialized within the process for the CLI's local single-process use. The one-way importer copies members, items, and loans into a separate empty destination, preserves IDs and dates, validates row counts and stock, and never edits the source. Verification used generated legacy-schema fixtures because no original SQLite database accompanied the supplied source. See commits `cec6910` and `1f08c9f` and the regression tests.
+
+The suite also starts simultaneous requests against both engines to verify that two callers cannot borrow the same final copy or push a member beyond the configured maximum in the supported single-process execution model. This is not a claim of multi-process write coordination for DuckDB.
 
 ## References
 
@@ -94,7 +100,7 @@ Introduce a storage boundary that returns named records and owns SQL, value mapp
 
 [6] P. Bourque and R. E. Fairley, Eds., *Guide to the Software Engineering Body of Knowledge*, Version 3.0. IEEE Computer Society, 2014, ch. 5, sec. 1.6. Available: https://ieeecs-media.computer.org/media/education/swebok/swebok-v3.pdf
 
-[7] H. Washizaki, Ed., *Guide to the Software Engineering Body of Knowledge*, Version 4.0a. IEEE Computer Society, Aug. 2026, ch. 7, sec. 1.6. Available: https://ieeecs-media.computer.org/media/education/swebok/swebok-v4.pdf
+[7] H. Washizaki, Ed., *Guide to the Software Engineering Body of Knowledge*, Version 4.0a. IEEE Computer Society, Sept. 2025, ch. 7, sec. 1.6, pp. 7–4–7–5. Available: https://ieeecs-media.computer.org/media/education/swebok/swebok-v4.pdf
 
 [8] SQLite, “Transaction,” *SQLite Documentation*. Available: https://www.sqlite.org/lang_transaction.html
 

@@ -1,0 +1,2 @@
+python -m library_system.migration library.db ../runtime/migrated.duckdb --engine duckdb
+Migration complete: {'members': 2, 'items': 3, 'loans': 1}

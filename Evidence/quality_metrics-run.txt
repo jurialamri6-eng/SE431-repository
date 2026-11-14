@@ -1,0 +1,188 @@
+{
+  "measured_on": "2026-11-19",
+  "tool": "Radon 6.0.1; Python AST for function/class/SQL counts",
+  "scope": "File-by-file counts for normalized legacy code, the post-maintenance snapshot, and the final library_system package. Tests excluded.",
+  "legacy": {
+    "files": [
+      "Source_Code\\legacy\\legacy_system_executable.py"
+    ],
+    "loc": 218,
+    "lloc": 100,
+    "sloc": 170,
+    "function_count": 5,
+    "class_count": 0,
+    "cyclomatic": {
+      "block_count": 5,
+      "average": 3.8,
+      "maximum": 6,
+      "borrow": 6,
+      "highest_blocks": [
+        {
+          "name": "borrow",
+          "complexity": 6,
+          "rank": "B"
+        },
+        {
+          "name": "main",
+          "complexity": 6,
+          "rank": "B"
+        },
+        {
+          "name": "return_book",
+          "complexity": 4,
+          "rank": "A"
+        },
+        {
+          "name": "search_books",
+          "complexity": 2,
+          "rank": "A"
+        },
+        {
+          "name": "setup",
+          "complexity": 1,
+          "rank": "A"
+        }
+      ]
+    },
+    "sql_execute_call_count": 17
+  },
+  "post_maintenance_pre_refactor": {
+    "files": [
+      "Source_Code\\pre_refactor_system.py"
+    ],
+    "loc": 411,
+    "lloc": 230,
+    "sloc": 365,
+    "function_count": 10,
+    "class_count": 0,
+    "cyclomatic": {
+      "block_count": 10,
+      "average": 7.0,
+      "maximum": 25,
+      "borrow": 12,
+      "highest_blocks": [
+        {
+          "name": "migrate_legacy_sqlite",
+          "complexity": 25,
+          "rank": "D"
+        },
+        {
+          "name": "borrow",
+          "complexity": 12,
+          "rank": "C"
+        },
+        {
+          "name": "return_book",
+          "complexity": 10,
+          "rank": "B"
+        },
+        {
+          "name": "run",
+          "complexity": 8,
+          "rank": "B"
+        },
+        {
+          "name": "initialize_schema",
+          "complexity": 4,
+          "rank": "A"
+        }
+      ]
+    },
+    "sql_execute_call_count": 36
+  },
+  "reengineered": {
+    "files": [
+      "Source_Code\\library_system\\__init__.py",
+      "Source_Code\\library_system\\__main__.py",
+      "Source_Code\\library_system\\cli.py",
+      "Source_Code\\library_system\\duckdb_repository.py",
+      "Source_Code\\library_system\\factory.py",
+      "Source_Code\\library_system\\migration.py",
+      "Source_Code\\library_system\\models.py",
+      "Source_Code\\library_system\\repository.py",
+      "Source_Code\\library_system\\service.py",
+      "Source_Code\\library_system\\sqlite_repository.py",
+      "Source_Code\\library_system\\storage.py"
+    ],
+    "loc": 878,
+    "lloc": 592,
+    "sloc": 724,
+    "function_count": 74,
+    "class_count": 12,
+    "cyclomatic": {
+      "block_count": 86,
+      "average": 2.22,
+      "maximum": 10,
+      "borrow": 5,
+      "highest_blocks": [
+        {
+          "name": "return_item",
+          "complexity": 10,
+          "rank": "B"
+        },
+        {
+          "name": "_build_items",
+          "complexity": 9,
+          "rank": "B"
+        },
+        {
+          "name": "_active_loans_by_book",
+          "complexity": 7,
+          "rank": "B"
+        },
+        {
+          "name": "_handle_return",
+          "complexity": 7,
+          "rank": "B"
+        },
+        {
+          "name": "run",
+          "complexity": 6,
+          "rank": "B"
+        }
+      ]
+    },
+    "sql_execute_call_count": 15
+  },
+  "refactoring_comparison": {
+    "borrow_complexity_before": 12,
+    "borrow_complexity_after": 5,
+    "maximum_complexity_before": 25,
+    "maximum_complexity_after": 10,
+    "method": "Same Radon version and analyzer; the before snapshot is the committed post-maintenance, pre-refactor single-file implementation."
+  },
+  "db_dependency_components": {
+    "legacy_functions_with_direct_sql": 4,
+    "reengineered_application_functions_with_sql": 0,
+    "reengineered_engine_specific_connector_modules": 2
+  },
+  "smell_inventory": {
+    "criteria": [
+      "long borrowing method",
+      "console output mixed with operations",
+      "database calls in business functions",
+      "embedded policy constants",
+      "positional row access",
+      "duplicated availability state"
+    ],
+    "legacy_count": 6,
+    "reengineered_count": 1,
+    "resolved": [
+      "long borrowing method",
+      "console output mixed with operations",
+      "database calls in business functions",
+      "embedded policy constants",
+      "positional row access"
+    ],
+    "residual": [
+      "available_copies is stored alongside open loan rows and must remain transactionally consistent"
+    ],
+    "method": "manual review against the six named criteria; not a Radon output"
+  },
+  "interpretation": {
+    "loc_comparison": "The final count grows with the repositories, adapters, policies, migration, and CLI. Counts exclude tests.",
+    "complexity_comparison": "Radon cyclomatic complexity is a static control-flow measure. Lower borrow() complexity and a lower maximum indicate simpler individual control paths, not proof of correctness.",
+    "sql_count_comparison": "AST execute-call count is syntactic. The reengineered count includes shared repository code; service/application business rules have no direct SQL calls."
+  }
+}
+Saved C:\Users\hp\Desktop\فيديوهات\legacy Lubrary\Evidence\quality_metrics.json

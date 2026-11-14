@@ -7,8 +7,12 @@ __pycache__/
 *.wal
 *.tmp
 Evidence/generated/
+Evidence/live_demo_contact_sheet_final.png
 *.mp4
 *.pptx
 *.pdf
 !Project_References/*.pdf
-!Report/*.pdf
+!Report/SE431_Final_Report.pdf
+!Presentation/SE431_Presentation.pptx
+SE431-Project-*.zip
+Git/*.bundle

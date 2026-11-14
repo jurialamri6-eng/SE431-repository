@@ -1,0 +1,69 @@
+python -m library_system --engine sqlite --database ../runtime/demo.sqlite3
+
+LIBRARY
+1 Search books
+2 Borrow a book
+3 Return a book
+4 Exit
+Choice: 1
+Search: Clean Code
+1 Clean Code - Robert Martin Available: 2/2
+
+LIBRARY
+1 Search books
+2 Borrow a book
+3 Return a book
+4 Exit
+Choice: 2
+Member ID: S1
+Book ID: 1
+Book borrowed. Due: 2026-12-03 (loan #1)
+
+LIBRARY
+1 Search books
+2 Borrow a book
+3 Return a book
+4 Exit
+Choice: 2
+Member ID: S1
+Book ID: 1
+Book borrowed. Due: 2026-12-03 (loan #2)
+
+LIBRARY
+1 Search books
+2 Borrow a book
+3 Return a book
+4 Exit
+Choice: 2
+Member ID: S1
+Book ID: 1
+Book is unavailable
+
+LIBRARY
+1 Search books
+2 Borrow a book
+3 Return a book
+4 Exit
+Choice: 3
+Member ID: S1
+Book ID: 1
+Loan #1 due 2026-12-03T04:14:04.704116
+Loan #2 due 2026-12-03T04:14:04.716172
+Loan ID to return: 1
+Book returned
+
+LIBRARY
+1 Search books
+2 Borrow a book
+3 Return a book
+4 Exit
+Choice: 1
+Search: Clean Code
+1 Clean Code - Robert Martin Available: 1/2
+
+LIBRARY
+1 Search books
+2 Borrow a book
+3 Return a book
+4 Exit
+Choice: 4

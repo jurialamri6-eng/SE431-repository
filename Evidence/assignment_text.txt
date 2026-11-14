@@ -1,0 +1,345 @@
+
+--- PAGE 1 ---
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Department of Computer Science 
+College of Computer and Cyber Sciences 
+ 
+ 
+ 
+ 
+SE431 – Software Maintenance and Evolution 
+ 
+Fall-2026 Project Description 
+The university has an old Library Management System (LMS). The system is functional but has 
+evolved without clear architecture. Each student group works as a software maintenance team and 
+is provided with the ~100 LOC legacy codebase for LMS. Their responsibility is to analyze, 
+maintain, refactor, and reengineer it. Following is the list of original requirements: 
+1. Active members can borrow books. 
+2. A member can borrow a maximum of 3 books. 
+3. A book can only be borrowed when available. 
+4. The normal borrowing period is 14 days. 
+5. A fine is charged for late returns. 
+6. Members can search for books. 
+ 
+Phase 1: Program comprehension analysis  
+This first part involves understanding the given codebase through program comprehension and 
+reverse engineering techniques. Students should investigate the existing system without initially 
+changing its implementation. They should identify major components, responsibilities, 
+dependencies, data flow, business rules, database structure/ schema, existing architectural problems 
+and code smells. Expected deliverables include: 
+• 
+Identify/confirm the given requirements from the code base  
+• 
+Business rules  
+• 
+Current architecture diagram 
+• 
+Class/module responsibility table 
+• 
+Dependency analysis  
+• 
+Code-smell identification 
+Phase 2: Maintenance  
+After having the basic understanding, maintenance requires considering the proposed change 
+request one-by-one and do the following for each request: 
+• 
+Maintenance classification  
+• 
+Impact analysis  
+o Affected components  
+o Affected database tables  
+• 
+Proposed design  
+• 
+Implementation (bonus marks) 
+Maintenance Request: 
+
+
+--- PAGE 2 ---
+ 
+ 
+MR-01: The library has purchased multiple copies of each book. The system must support more 
+than one available copy. 
+MR-02: The university wants to replace the current database implementation. The business 
+functionality should remain unchanged.  
+ 
+Phase 3: Refactoring 
+The borrow()function has become difficult to maintain. Refactor the system while preserving 
+externally observable behavior. This section requires at least two more documented refactoring like 
+fixing long methods, mixed responsibilities, direct DB access, primitive data etc.  
+ 
+Phase 4: Reuse & Domain Engineering 
+The university wants an Equipment Borrowing System for managing the equipment like laptops, 
+projectors, cameras and laboratory instruments. Students must analyze the commonality between 
+the two systems in terms of: 
+• Common features 
+• Variable features 
+And propose a reusable domain architecture. 
+Phase 5: Quality Evaluation of Reengineered Architecture 
+Based on the maintenance problems analyzed in part 1 and reengineered architecture proposed, this 
+section includes the quality evaluation of new system architecture that should be evident through 
+the following measurements: 
+• Lines of Code (LOC)  
+• number of functions 
+• number of classes 
+• cyclomatic complexity 
+• code smells 
+• DB dependencies 
+Phase 6: Git Repository 
+For managing your project, start with the basic legacy code and gradually create the commits. 
+Your Git repository should include the following:  
+01 - Initial legacy system 
+02 - Program comprehension analysis 
+03 – Maintenance Request incorporation 
+04 - Refactor borrowing module 
+05 - Add Equipment Borrowing System analysis for re-use 
+06 - Final reengineered system 
+ 
+This Git repository/history should be part of the submission, must show the system evolution in a 
+sequence as described in various parts of the projects.  
+ 
+ 
+ 
+ 
+ 
+         
+
+
+--- PAGE 3 ---
+ 
+ 
+Complete Submission 
+ 
+ 
+ 
+On or before   22/11/2026 – 11:59 PM 
+Submission Form: 
+ 
+Zipped file contains:  
+ 
+1: A written report (MS Word) (around 2000 words.)  
+2: Power point presentation 
+3: video recording of the Demo (explaining all steps of 
+evolution/maintenance including Git repository/History 
+description) 
+4: Git repository/history, link must be shared 
+ 
+To be submitted both in MS Teams for this class  
+ 
+Please use this naming convention: (SE431-Project-Fall 26-TeamNo) 
+Work Type: 
+ 
+Team work (3 – 4 students per group) 
+   
+Targeted learning 
+outcomes: 
+C.L.O 2.1 Evaluate the legacy systems to decide whether they should be scrapped, 
+maintained, reengineered, or replaced. 
+C.L.O 2.2 Apply reverse engineering and reengineering for program comprehension 
+techniques. 
+C.L.O 2.2 Apply Refactoring and Impact analysis techniques 
+C.L.O 3.1 Participate in a collaborative group work and lead when needed 
+C.L.O 3.2 Communicate effectively in oral and written form 
+Marks 
+25  marks 
+Assessment 
+Components: 
+1. Program Comprehension & Legacy-System Analysis [4 marks] 
+2. Maintenance Classification & Evolution Analysis [3 marks + 1(bonus)] 
+3. Refactoring [4 marks] 
+4. Reuse & Domain Engineering [3 marks] 
+5. Quality Evaluation of Reengineered Architecture [2 marks] 
+6. Apply project management tools and techniques (should be documented clearly in 
+the report). [3 marks] 
+7. Oral presentation and discussion [5 marks] 
+Penalties: 
+▪ Late submission: 1 mark per day (for maximum of three days). Any submission after 
+these three days WILL NOT BE ACCEPTED. 
+▪ Plagiarism: In case of plagiarism, ZERO tolerance policy will be applied. This 
+means that the submitted report will be rejected and zero marks will be given. 
+Plagiarism forms include, but not limited to, submitting a copied work from any 
+source (student’s report, internet sources without proper referencing, or ChatGPT).  
+▪ Failing to answer ALL questions (during the Q&A session): If the questions are 
+related to your own work submitted in your own report,  ZERO marks will be 
+recorded in this assessment 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+
+--- PAGE 4 ---
+ 
+ 
+Software Engineering Program Student Outcomes Rubrics for 
+SE431 (SO5 and SO7) 
+ 
+ 
+Outcome (5): Ability to function effectively on a team whose members together provide leadership, create a 
+collaborative and inclusive environment, establish goals, plan tasks, and meet objectives 
+ 
+The student should be able to: 
+KPI # 
+KPI  
+KPI Tasks (Description) 
+Exceeds Expectation (EE) 
+9 – 10 
+(When 
+the 
+student 
+has 
+complete
+d all the 
+KPIs 
+tasks in 
+the best 
+quality) 
+Meets Expectation (ME) 
+7 – 8 
+Needs Improvement (NI)  
+5 – 6 
+Unsatisfactory (U) 
+0 - 4 
+5.1 
+Work 
+effectively 
+in 
+teamwork 
+ 
+(2 marks) 
+• Attend all meetings on time. 
+• Contribute ideas and solutions to team projects. 
+• Use appropriate communication tools and technologies to facilitate 
+collaboration. 
+• Provide and seek feedback to enhance team performance. 
+ 
+
+
+--- PAGE 5 ---
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+5.2 
+Apply 
+project 
+managem
+ent tools 
+and 
+techniques 
+ 
+(3 marks) 
+• Define the project objectives clearly. (You may consider using a 
+Project Charter template.) 
+• Break down the project into manageable tasks and milestones. 
+• Identify necessary resources for each task, including personnel, 
+equipment, and materials. 
+• Track the progress of tasks and milestones against the project plan. 
+• Meet deadlines. 
+• Identify and resolve any issues and risks. 
+• 
+Independently manage and execute project tasks assigned to you 
+ 
+
+
+--- PAGE 6 ---
+ 
+ 
+ 
+ 
+Outcome (7): Ability to acquire and apply new knowledge as needed, using appropriate learning strategies 
+ 
+• The student should be able to: 
+KPI 
+# 
+KPI  
+KPI Tasks 
+Exceeds Expectation (EE) 
+9 – 10 (When the 
+student has 
+completed all the 
+KPIs tasks in the 
+best quality) 
+Meets Expectation (ME) 
+7 – 8 
+Needs Improvement (NI)  
+5 – 6 
+Unsatisfactory (U) 
+0 - 4 
+7.1 
+Demonstrate Continuous 
+Development 
+ 
+(5 marks) 
+• Determine new knowledge needed for task 
+execution. (i.e., Identify gaps in your 
+current knowledge, such as mastering a 
+new web technology (e.g., React, Django), 
+improving soft skills (e.g., effective 
+communication or time management), or 
+developing a business model (e.g., 
+revenue streams, value proposition), that 
+are essential for completing the project 
+successfully) 
+• Utilize a variety of credible resources, 
+such as online courses, books, and 
+journals, for self-study. (i.e., Seek out 
+trustworthy sources to gain new 
+knowledge. For example, to improve your 
+understanding of customer segments and 
+value propositions for developing a 
+business model, you might take an online 
+course on the Business Model Canvas or 
+ 
+
+
+--- PAGE 7 ---
+ 
+ 
+attend the sessions administrated by the 
+Entrepreneurship Center) 
+• Apply the newly acquired knowledge 
+effectively to perform the task. (i.e., Use 
+the new information you’ve learned to 
+enhance your project. For example, after 
+learning about the Business Model 
+Canvas, you can apply this knowledge to 
+map out the key components of your 
+business, such as customer segments, 
+value propositions, and revenue streams, 
+ensuring the model aligns with your 
+project goals.) 
+ 
+ 
