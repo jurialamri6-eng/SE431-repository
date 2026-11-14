@@ -1,0 +1,14 @@
+.venv/
+__pycache__/
+*.py[cod]
+*.sqlite
+*.sqlite3
+*.duckdb
+*.wal
+*.tmp
+Evidence/generated/
+*.mp4
+*.pptx
+*.pdf
+!Project_References/*.pdf
+!Report/*.pdf
