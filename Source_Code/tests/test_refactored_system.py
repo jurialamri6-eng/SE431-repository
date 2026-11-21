@@ -105,6 +105,57 @@ class CirculationTestMixin:
         )
         self.assertEqual(len(self.service.search("%", ItemType.BOOK)), 3)
 
+    def test_accented_search_matches_legacy_sqlite(self) -> None:
+        with self.storage.transaction():
+            self.storage.add_item(BorrowableItem(4, ItemType.BOOK, "École", "Demo", 1, 1))
+            self.storage.add_item(BorrowableItem(5, ItemType.BOOK, "Textbook", "Élodie", 1, 1))
+
+        for query, expected_ids in (
+            ("école", []),
+            ("École", [4]),
+            ("ÉCO_E", [4]),
+            ("E\u0301cole", []),
+            ("élodie", []),
+            ("ÉLODIE", [5]),
+            ("École\x00ignored", [4]),
+            ("", [1, 2, 3, 4, 5]),
+        ):
+            with self.subTest(query=query):
+                self.assertEqual(
+                    [item.item_id for item in self.service.search(query, ItemType.BOOK)],
+                    expected_ids,
+                )
+
+    def test_returned_loan_agrees_with_database_and_restores_stock_once(self) -> None:
+        first = self.service.borrow("S1", ItemType.BOOK, 1)
+        second = self.service.borrow("S1", ItemType.BOOK, 1)
+        self.assertTrue(first.success and second.success)
+        self.assertFalse(first.loan.returned)
+        loan_id = first.loan.loan_id
+        self.now = first.loan.due_at + timedelta(hours=25)
+
+        with patch.object(self.storage, "increase_available", side_effect=RuntimeError("forced return failure")):
+            with self.assertRaisesRegex(RuntimeError, "forced return failure"):
+                self.service.return_item("S1", ItemType.BOOK, 1, loan_id)
+        self.assertIsNotNone(self.storage.get_open_loan(loan_id))
+        self.assertEqual(self.storage.get_item(ItemType.BOOK, 1).available_copies, 0)
+
+        result = self.service.return_item("S1", ItemType.BOOK, 1, loan_id)
+        self.assertTrue(result.success)
+        self.assertEqual(result.fine, 1)
+        self.assertEqual(result.loan.loan_id, loan_id)
+        self.assertIs(result.loan.returned, True)
+        saved = self.storage.connection.execute(
+            "SELECT returned FROM loans WHERE id = ?", (loan_id,)
+        ).fetchone()
+        self.assertEqual(saved, (int(result.loan.returned),))
+
+        duplicate = self.service.return_item("S1", ItemType.BOOK, 1, loan_id)
+        self.assertFalse(duplicate.success)
+        self.assertIsNone(duplicate.loan)
+        self.assertEqual(self.storage.get_item(ItemType.BOOK, 1).available_copies, 1)
+        self.assertIsNotNone(self.storage.get_open_loan(second.loan.loan_id))
+
     def test_failed_copy_update_rolls_back_loan_and_stock(self) -> None:
         with patch.object(self.storage, "decrease_available", side_effect=RuntimeError("forced")):
             with self.assertRaisesRegex(RuntimeError, "forced"):

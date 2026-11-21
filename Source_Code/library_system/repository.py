@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from contextlib import contextmanager
+from dataclasses import replace
 from typing import Any, Iterator
 
 from .models import BorrowableItem, ItemType, Loan, Member
@@ -12,6 +13,7 @@ class SQLRepository:
     """Database details stay behind this repository; callers use named records."""
 
     begin_statement = "BEGIN"
+    like_operand = "{}"
 
     def __init__(self, connection: Any) -> None:
         self.connection = connection
@@ -142,9 +144,12 @@ class SQLRepository:
         self, text: str, item_type: ItemType | None = None
     ) -> list[BorrowableItem]:
         pattern = f"%{text}%"
-        sql = """SELECT item_type, item_id, name, creator, total_copies, available_copies
-                 FROM items
-                 WHERE (lower(name) LIKE lower(?) OR lower(creator) LIKE lower(?))"""
+        name = self.like_operand.format("name")
+        creator = self.like_operand.format("creator")
+        parameter = self.like_operand.format("?")
+        sql = f"""SELECT item_type, item_id, name, creator, total_copies, available_copies
+                  FROM items
+                  WHERE ({name} LIKE {parameter} OR {creator} LIKE {parameter})"""
         values: tuple[Any, ...] = (pattern, pattern)
         if item_type is not None:
             sql += " AND item_type = ?"
@@ -244,7 +249,7 @@ class SQLRepository:
         self.connection.execute(
             "UPDATE loans SET returned = 1 WHERE id = ? AND returned = 0", (loan_id,)
         )
-        return loan
+        return replace(loan, returned=True)
 
     def decrease_available(self, item: BorrowableItem) -> None:
         if item.available_copies < 1:
