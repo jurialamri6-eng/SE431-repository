@@ -16,6 +16,12 @@ ROOT = Path(__file__).resolve().parents[1]
 TEMPLATE = ROOT / "Project_References" / "UPM_Official_Presentation_Template.pptx"
 OUTPUT = ROOT / "Presentation" / "SE431_Presentation.pptx"
 METRICS = json.loads((ROOT / "Evidence" / "quality_metrics.json").read_text(encoding="utf-8"))
+REVIEW = json.loads((ROOT / "Documentation" / "review_status.json").read_text(encoding="utf-8-sig"))
+TEAM = REVIEW["team"]
+REPO = REVIEW["repository"]
+TEAM_MEMBERS = ", ".join(f"{m['name']} ({m['id']})" for m in TEAM["members"]) or "Not supplied"
+COMMIT_COUNT = REPO["original_stages"] + REPO["review_commits"]
+REPOSITORY = REPO["url"] or "Repository link not supplied"
 BLUE = RGBColor(17, 89, 129)
 TEAL = RGBColor(19, 187, 183)
 INK = RGBColor(35, 48, 58)
@@ -183,8 +189,10 @@ def format_cover(prs: Presentation) -> None:
                    size=24, color=BLUE, bold=True)
     add_plain_text(
         slide,
-        "SE431: Software Maintenance and Evolution\nFall 2026 Course Project\n\n"
-        "Team No.: [enter number]\nMembers and IDs: [enter actual names]\nInstructor: [enter name]",
+        "SE431: Software Maintenance and Evolution\nFall 2026 | Review copy\n"
+        f"Team number: {TEAM['number'] or 'Not supplied'}\n"
+        f"Members and IDs: {TEAM_MEMBERS}\n"
+        f"Instructor: {TEAM['instructor'] or 'Not supplied'}",
         8.4, 4.92, 4.65, 1.82, size=13.5, color=INK,
     )
 
@@ -199,7 +207,7 @@ def build() -> None:
     format_cover(prs)
     prs.core_properties.title = "SE431 Legacy Library System: Course Project"
     prs.core_properties.subject = "Program comprehension, maintenance, refactoring, reuse, and quality evaluation"
-    prs.core_properties.author = "SE431 Project Team"
+    prs.core_properties.author = "SE431 review copy"
 
     # 1 and 2 are the official cover and Bismillah pages.
     add_text_slide(prs, "Project objective and original requirements", [
@@ -251,13 +259,13 @@ def build() -> None:
     slide = add_title_only(prs, "Phase 3: refactoring and behavior", 7)
     add_table(slide, [
         ["Change", "Before", "After"],
-        ["Decompose borrow()", "Eligibility, stock, dates, writes, and output were together.", "Named member/item checks; borrow() complexity changed from 12 to 5."],
+        ["Decompose borrow()", "Eligibility, stock, dates, writes, and output were together.", "Extracted named member and item checks."],
         ["Separate console work", "Menu input and printed messages shared the lending flow.", "cli.py handles the menu; LendingService returns outcomes."],
         ["Use named data and extract fine calculation", "Rows used tuple positions; return logic did the arithmetic and SQL.", "Repositories return named records; a helper calculates completed-day fines."],
     ], 0.95, 1.85, 11.4, 3.85, [2.8, 4.2, 4.4], 14)
     add_bullet_box(slide, [
         "Single-copy behavior was compared with a normalized legacy fixture after fixing the supplied syntax and entry-point defects.",
-        "The pre-refactor and final book menus produce matching results on both engines.",
+        "Both engines preserve the book menu. The review also checks accented search and the returned loan flag.",
     ], 1.0, 5.95, 11.2, 0.8, size=15, gap=2)
 
     add_figure_slide(
@@ -266,37 +274,39 @@ def build() -> None:
     )
 
     slide = add_title_only(prs, "Phase 5: quality and test evidence", 9)
-    old = METRICS["legacy"]
-    new = METRICS["reengineered"]
+    stages = [METRICS[key] for key in ("legacy", "post_maintenance_pre_refactor", "reengineered")]
     text = (ROOT / "Evidence" / "test-results.txt").read_text(encoding="utf-8")
     test_count = re.search(r"Ran (\d+) tests? in", text).group(1)
     rows = [
-        ["Measure", "Legacy", "Reengineered"],
-        ["LOC / logical LOC", f"{old['loc']} / {old['lloc']}", f"{new['loc']} / {new['lloc']}"],
-        ["Functions / classes", f"{old['function_count']} / {old['class_count']}", f"{new['function_count']} / {new['class_count']}"],
-        ["Average / maximum complexity", f"{old['cyclomatic']['average']} / {old['cyclomatic']['maximum']}", f"{new['cyclomatic']['average']} / {new['cyclomatic']['maximum']}"],
-        ["borrow() complexity", str(old['cyclomatic']['borrow']), str(new['cyclomatic']['borrow'])],
-        ["Manual smells / functions with SQL", "6 / 4", "1 residual / 0 in service rules"],
+        ["Automated measure", "Legacy", "After Maintenance", "After Refactoring"],
+        ["Physical LOC", *[str(stage["loc"]) for stage in stages]],
+        ["Logical LOC", *[str(stage["lloc"]) for stage in stages]],
+        ["Functions / classes", *[f"{stage['function_count']} / {stage['class_count']}" for stage in stages]],
+        ["Mean / max complexity", *[f"{stage['cyclomatic']['average']} / {stage['cyclomatic']['maximum']}" for stage in stages]],
+        ["borrow() complexity", *[str(stage["cyclomatic"]["borrow"]) for stage in stages]],
     ]
-    add_table(slide, rows, 0.95, 1.8, 11.4, 3.8, [4.0, 3.5, 3.9], 16)
+    add_table(slide, rows, 0.95, 1.8, 11.4, 3.55, [3.50, 2.15, 2.87, 2.88], 16)
     add_bullet_box(slide, [
-        f"{test_count} tests passed. The suite checks both engines, menu compatibility, migration and transaction rollback.",
-        "The final code includes adapters and migration. Borrow complexity is 12 before refactoring and 5 after."
-    ], 1.0, 5.85, 11.2, 0.95, size=15, gap=4)
+        f"{test_count} tests passed. Both engines agree on the accented search and successful return state.",
+        "Manual review counted six legacy issues and one remaining stock invariant.",
+        "SQL stays in storage and migration. LendingService calls the storage interface.",
+    ], 1.0, 5.60, 11.2, 1.25, size=14.5, gap=4)
 
     slide = add_title_only(prs, "Project plan, tracking, and teamwork", 10)
+    tasks = REVIEW["tasks"]
     add_table(slide, [
-        ["Milestone", "Progress evidence", "Status"],
-        ["01–02: baseline and analysis", "Initial system and analysis commits; supplied source and diagrams.", "Complete"],
-        ["03: maintenance changes", "MR-01 and MR-02 implementation; local fixtures.", "Complete"],
-        ["04: refactor", "LendingService, storage separation, regression evidence.", "Complete"],
-        ["05: reuse", "Book/equipment common and variable features.", "Complete"],
-        ["06: quality and delivery", "Metrics, report, slides, demo, bundle.", "Team review pending"],
-    ], 0.95, 1.8, 11.4, 3.7, [3.1, 6.2, 2.1], 15)
+        ["Milestone", "Recorded date", "Status and evidence"],
+        [tasks[0]["task"], tasks[0]["actual"], tasks[0]["evidence"]],
+        [tasks[1]["task"], tasks[1]["actual"], tasks[1]["evidence"]],
+        [tasks[2]["task"], tasks[2]["actual"], tasks[2]["evidence"]],
+        ["07–08: technical and delivery review", tasks[4]["actual"], "Local tests, measurements, slides, recording and bundle"],
+        ["Team records and submission", tasks[-1]["actual"] or "Not supplied", tasks[-1]["status"]],
+    ], 0.95, 1.8, 11.4, 3.6, [3.50, 2.80, 5.10], 15)
     add_bullet_box(slide, [
-        "The Teams deadline is 22 November 2026 at 11:59 PM. Complete the team review before upload.",
-        "Resources: Python, SQLite, DuckDB, Git, Radon, diagrams.net, Word, PowerPoint, and the supplied files.",
-        "Team names, task owners, meeting attendance, and feedback records were not supplied; the report leaves fields for the group to complete.",
+        f"The Teams deadline is {REVIEW['course_deadline']}.",
+        "Appendix C records task resources, planned and actual dates, status and proof.",
+        ("Team collaboration records are listed in Appendix C." if REVIEW["collaboration"] else
+         "Team owners, meeting dates, member contributions and feedback have not been supplied."),
     ], 1.0, 5.65, 11.2, 1.15, size=14, gap=3)
 
     slide = add_title_only(prs, "Phase 6: Git history and learning", 11)
@@ -308,21 +318,23 @@ def build() -> None:
         ["04", "Borrowing refactor and storage isolation"],
         ["05", "Equipment lending reuse analysis"],
         ["06", "Final reengineered system"],
+        ["07", "Search, return and setup corrections"],
+        ["08", "Review documents and live recording"],
     ], 0.95, 1.8, 5.35, 4.8, [1.2, 4.15], 14)
     add_plain_text(slide, "New knowledge applied", 6.75, 1.8, 5.4, 0.45, size=20, color=BLUE, bold=True)
     add_bullet_box(slide, [
         "Database transactions and DB-API: Python sqlite3 and DuckDB documentation; applied in adapters and migration checks.",
         "Refactoring: Fowler and SEBoK; applied to borrow(), CLI separation, and named records.",
         "Complexity measurement: Radon documentation; applied in the reproducible quality report.",
-        "The local bundle contains six commits. The team still needs to add the shared repository link.",
+        f"The bundle has {COMMIT_COUNT} commits. {REPOSITORY}. Earlier authorship is retained.",
     ], 6.75, 2.35, 5.45, 4.25, size=15, gap=10)
 
     slide = add_text_slide(prs, "Demo and discussion", [
-        "The demo shows the actual terminal on SQLite and DuckDB, code changes and the six Git stages.",
+        "The screen recording follows the live terminal, both engines, code changes, tests, metrics and Git history.",
         "Why can the old availability flag not give a copy count? It records only available or unavailable, so ambiguous stock needs a verified inventory.",
         "How is the last copy protected? The stock check and loan update share a transaction; concurrent tests allow only one request to succeed.",
         "What behavior was preserved? The single-copy fixture compares search, borrowing, due dates, and completed-day fines after syntax repair.",
-        "Migration was checked with generated legacy fixtures. The classroom demo runs in one process.",
+        "The migration used a generated legacy fixture. The review demonstrates École and the saved return status.",
     ], 12, size=17)
 
     OUTPUT.parent.mkdir(parents=True, exist_ok=True)

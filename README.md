@@ -70,7 +70,7 @@ No original legacy database was included with the supplied source code, so migra
 - `Documentation/` — Phase 1–2 analysis and Phase 4 design.
 - `Report/` — final editable Word report with an automatic table of contents, refreshed PDF, and the University of Prince Mugrin logo.
 - `Presentation/` — editable student presentation based on the official UPM PowerPoint template.
-- `Demo/` — screen recording of the live terminal, guide and transcripts for both engines.
+- `Demo/` — screen recording of the live terminal with narration, guide and transcripts for both engines.
 - `Drawio_Diagrams/` — editable diagrams.net source, four project diagrams on Pages 3–6, the supplied pages and a vector PDF for reading.
 - `Evidence/` — assignment text extraction, test output, and quality metrics.
 - `Git/` — cloneable local bundle with the six original stages and the two review commits.

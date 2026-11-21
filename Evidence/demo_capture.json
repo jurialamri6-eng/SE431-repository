@@ -1,0 +1,83 @@
+{
+  "method": "Screen capture of the dedicated Windows Console Host window during live commands",
+  "caption_method": "Chapter notes inside the native console",
+  "width": 1380,
+  "height": 874,
+  "fps": 12,
+  "frame_count": 2032,
+  "duration_seconds": 169.333,
+  "chapters": [
+    {
+      "seconds": 0.088,
+      "title": "01  |  THE SUPPLIED PROGRAM"
+    },
+    {
+      "seconds": 11.602,
+      "title": "01  |  RUN THE NORMALIZED LEGACY COPY"
+    },
+    {
+      "seconds": 21.103,
+      "title": "MR-01  |  SEARCH AND BORROW ON SQLITE"
+    },
+    {
+      "seconds": 31.797,
+      "title": "CONTINUE ON SQLITE  |  REJECT, RETURN, RECHECK"
+    },
+    {
+      "seconds": 43.738,
+      "title": "MR-02  |  SEARCH AND BORROW ON DUCKDB"
+    },
+    {
+      "seconds": 54.653,
+      "title": "CONTINUE ON DUCKDB  |  REJECT, RETURN, RECHECK"
+    },
+    {
+      "seconds": 65.886,
+      "title": "MR-02  |  MIGRATE THE LEGACY FIXTURE"
+    },
+    {
+      "seconds": 75.334,
+      "title": "04  |  COMPARE BORROWING BEFORE AND AFTER"
+    },
+    {
+      "seconds": 88.679,
+      "title": "04  |  TWO MORE REFACTORINGS"
+    },
+    {
+      "seconds": 99.244,
+      "title": "05  |  REUSE THE LENDING SERVICE FOR EQUIPMENT"
+    },
+    {
+      "seconds": 110.39,
+      "title": "REVIEW FIXES  |  CHECK BOTH ENGINES"
+    },
+    {
+      "seconds": 121.513,
+      "title": "QUALITY  |  RUN THE FULL TEST SUITE"
+    },
+    {
+      "seconds": 130.681,
+      "title": "QUALITY  |  TEST RESULT AND RECOMPUTED METRICS"
+    },
+    {
+      "seconds": 141.045,
+      "title": "GIT  |  SIX ORIGINAL STAGES AND THE REVIEW FIX"
+    },
+    {
+      "seconds": 152.201,
+      "title": "GIT  |  INSPECT THE ACTUAL SEARCH FIX"
+    },
+    {
+      "seconds": 163.271,
+      "title": "DONE  |  LOCAL VERIFICATION COMPLETE"
+    }
+  ],
+  "narration": {
+    "voice": "Microsoft Zira Desktop (local synthesis)",
+    "language": "English",
+    "codec": "AAC",
+    "cue_count": 16
+  },
+  "decoded_frames": 2032,
+  "sha256": "67850e411b4d873ef726a248dc6fe1956cfb6de8210200022a5df81cd34a7a4a"
+}

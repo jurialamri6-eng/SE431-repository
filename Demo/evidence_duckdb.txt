@@ -17,7 +17,7 @@ LIBRARY
 Choice: 2
 Member ID: S1
 Book ID: 1
-Book borrowed. Due: 2026-12-03 (loan #1)
+Book borrowed. Due: 2026-12-06 (loan #1)
 
 LIBRARY
 1 Search books
@@ -27,7 +27,7 @@ LIBRARY
 Choice: 2
 Member ID: S1
 Book ID: 1
-Book borrowed. Due: 2026-12-03 (loan #2)
+Book borrowed. Due: 2026-12-06 (loan #2)
 
 LIBRARY
 1 Search books
@@ -47,8 +47,8 @@ LIBRARY
 Choice: 3
 Member ID: S1
 Book ID: 1
-Loan #1 due 2026-12-03T04:14:17.272421
-Loan #2 due 2026-12-03T04:14:17.307556
+Loan #1 due 2026-12-06T02:36:10.970145
+Loan #2 due 2026-12-06T02:36:11.019195
 Loan ID to return: 1
 Book returned
 

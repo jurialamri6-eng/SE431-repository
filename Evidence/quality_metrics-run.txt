@@ -1,5 +1,5 @@
 {
-  "measured_on": "2026-11-19",
+  "measured_on": "2026-11-22",
   "tool": "Radon 6.0.1; Python AST for function/class/SQL counts",
   "scope": "File-by-file counts for normalized legacy code, the post-maintenance snapshot, and the final library_system package. Tests excluded.",
   "legacy": {
@@ -104,9 +104,9 @@
       "Source_Code\\library_system\\sqlite_repository.py",
       "Source_Code\\library_system\\storage.py"
     ],
-    "loc": 878,
-    "lloc": 592,
-    "sloc": 724,
+    "loc": 888,
+    "lloc": 598,
+    "sloc": 733,
     "function_count": 74,
     "class_count": 12,
     "cyclomatic": {
@@ -185,4 +185,4 @@
     "sql_count_comparison": "AST execute-call count is syntactic. The reengineered count includes shared repository code; service/application business rules have no direct SQL calls."
   }
 }
-Saved C:\Users\hp\Desktop\فيديوهات\legacy Lubrary\Evidence\quality_metrics.json
+Saved C:\Users\hp\Desktop\فيديوهات\SE431-Review-2026-11-22\Evidence\quality_metrics.json

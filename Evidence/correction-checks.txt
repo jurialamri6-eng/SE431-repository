@@ -1,0 +1,22 @@
+SQLITE  |  Temporary sample database
+  search 'école': []  |  original SQLite: []
+  search 'École': ['École']  |  original SQLite: ['École']
+  search 'ÉCO_E': ['École']  |  original SQLite: ['École']
+  search 'dEmO aUtHoR': ['École']  |  original SQLite: ['École']
+  search '%': ['École']  |  original SQLite: ['École']
+  search '': ['École']  |  original SQLite: ['École']
+  returned in the result: True  |  stored returned: True
+  fine for 25 hours overdue: 1
+  repeat accepted: False  |  available before and after: 2/2
+DUCKDB  |  Temporary sample database
+  search 'école': []  |  original SQLite: []
+  search 'École': ['École']  |  original SQLite: ['École']
+  search 'ÉCO_E': ['École']  |  original SQLite: ['École']
+  search 'dEmO aUtHoR': ['École']  |  original SQLite: ['École']
+  search '%': ['École']  |  original SQLite: ['École']
+  search '': ['École']  |  original SQLite: ['École']
+  returned in the result: True  |  stored returned: True
+  fine for 25 hours overdue: 1
+  repeat accepted: False  |  available before and after: 2/2
+
+All direct correction checks passed.

@@ -14,22 +14,26 @@ test_multiple_copies_and_last_copy_rejection (test_pre_refactor_system.SQLiteBeh
 test_return_restores_one_copy_and_cannot_repeat (test_pre_refactor_system.SQLiteBehaviourTests.test_return_restores_one_copy_and_cannot_repeat) ... ok
 test_search_keeps_wildcard_and_case_insensitive_matching (test_pre_refactor_system.SQLiteBehaviourTests.test_search_keeps_wildcard_and_case_insensitive_matching) ... ok
 test_three_outstanding_loan_limit (test_pre_refactor_system.SQLiteBehaviourTests.test_three_outstanding_loan_limit) ... ok
+test_accented_search_matches_legacy_sqlite (test_refactored_system.DuckDBCirculationTests.test_accented_search_matches_legacy_sqlite) ... ok
 test_failed_copy_update_rolls_back_loan_and_stock (test_refactored_system.DuckDBCirculationTests.test_failed_copy_update_rolls_back_loan_and_stock) ... ok
 test_fourteen_day_due_date_and_fine_day_rounding (test_refactored_system.DuckDBCirculationTests.test_fourteen_day_due_date_and_fine_day_rounding) ... ok
 test_member_limit_and_member_status (test_refactored_system.DuckDBCirculationTests.test_member_limit_and_member_status) ... ok
 test_multiple_copies_exhaustion_and_atomic_return (test_refactored_system.DuckDBCirculationTests.test_multiple_copies_exhaustion_and_atomic_return) ... ok
 test_multiple_same_title_requires_specific_loan_id (test_refactored_system.DuckDBCirculationTests.test_multiple_same_title_requires_specific_loan_id) ... ok
+test_returned_loan_agrees_with_database_and_restores_stock_once (test_refactored_system.DuckDBCirculationTests.test_returned_loan_agrees_with_database_and_restores_stock_once) ... ok
 test_search_preserves_case_insensitive_and_sql_wildcards (test_refactored_system.DuckDBCirculationTests.test_search_preserves_case_insensitive_and_sql_wildcards) ... ok
 test_data_and_ids_are_preserved_in_alternate_engine (test_refactored_system.ReengineeredMigrationTests.test_data_and_ids_are_preserved_in_alternate_engine) ... ok
+test_accented_search_matches_legacy_sqlite (test_refactored_system.SQLiteCirculationTests.test_accented_search_matches_legacy_sqlite) ... ok
 test_failed_copy_update_rolls_back_loan_and_stock (test_refactored_system.SQLiteCirculationTests.test_failed_copy_update_rolls_back_loan_and_stock) ... ok
 test_fourteen_day_due_date_and_fine_day_rounding (test_refactored_system.SQLiteCirculationTests.test_fourteen_day_due_date_and_fine_day_rounding) ... ok
 test_member_limit_and_member_status (test_refactored_system.SQLiteCirculationTests.test_member_limit_and_member_status) ... ok
 test_multiple_copies_exhaustion_and_atomic_return (test_refactored_system.SQLiteCirculationTests.test_multiple_copies_exhaustion_and_atomic_return) ... ok
 test_multiple_same_title_requires_specific_loan_id (test_refactored_system.SQLiteCirculationTests.test_multiple_same_title_requires_specific_loan_id) ... ok
+test_returned_loan_agrees_with_database_and_restores_stock_once (test_refactored_system.SQLiteCirculationTests.test_returned_loan_agrees_with_database_and_restores_stock_once) ... ok
 test_search_preserves_case_insensitive_and_sql_wildcards (test_refactored_system.SQLiteCirculationTests.test_search_preserves_case_insensitive_and_sql_wildcards) ... ok
 
 ----------------------------------------------------------------------
-Ran 29 tests in 29.135s
+Ran 33 tests in 38.133s
 
 OK
 1 Clean Code - Robert Martin Available: 2/2

@@ -1,16 +1,24 @@
 # SE431 Demo Guide
 
-Open SE431_Demo.mp4. It shows the captured output of real terminal runs. The captions explain each step. The terminal commands can be repeated using the README.
+Open SE431_Demo.mp4. The video captures the live console running Python and Git. It includes on-screen explanations and a locally generated English voice-over. The screen shows the review at commit 07, before commit 08 recorded the delivery files.
 
-| Chapter | What to explain |
+| Chapter | What to show and explain |
 |---|---|
-| Phase 1: legacy program | Show the original Python and SQLite flow. The shared database access and one-copy flag make changes harder. The supplied text was preserved and its syntax was repaired in a separate runnable copy. |
-| MR-01: multiple copies | Search for Clean Code. Start at 2/2, borrow twice, and try the third request. Return loan 1 and search again to see 1/2. |
-| MR-02: database replacement | Change the engine to DuckDB and run the same book workflow. Then run the importer on a generated legacy database. The importer reports two members, three items and one loan. |
-| Phase 3: refactoring | Compare the long borrow method with the member and item checks in LendingService. Explain how the console, policies and repository are separated. |
-| Phase 4: reusable domain | Explain the shared member, item and loan records, then show the projector borrowed on DuckDB under a demonstration policy. |
-| Phase 5: quality | Use the recorded results from both engines. Compare the post-maintenance prototype with the final code to isolate the refactoring effect. |
-| Phase 6: Git | Show the six ordered stages and name one change made at each stage. |
+| 1. Legacy program | Open the supplied text and the separate executable copy. Show the indentation and entry-guard repair. Run the original one-copy flow on a temporary SQLite database. |
+| 2. MR-01 | Search for Clean Code at 2/2. Borrow twice, see the third request rejected, return loan 1 and search again to show 1/2. |
+| 3. MR-02 | Repeat the same book actions with the DuckDB engine. Run the importer on the temporary legacy fixture. Check the counts and the unchanged source file. |
+| 4. Refactoring | Compare the actual stage 03 and stage 04 code. Explain the named member and item checks, the separate command-line adapter, named records and the fine helper. |
+| 5. Reuse | Search for and borrow the demo projector. Explain the shared lending service and the separate sample equipment policy. |
+| 6. Review fixes | Search for école and École on both engines. Show that the returned loan flag matches the stored flag and a duplicate return leaves stock unchanged. |
+| 7. Tests and metrics | Run the full suite and show the actual summary. Compare the legacy script, maintenance prototype and refactored package. Explain why added features increased LOC. |
+| 8. Git | Open the actual log and diff. Point out the six original stages and commit 07. The local bundle also records commit 08 with the review files and this video. |
 
-The SQLite and DuckDB book sessions, equipment session and migration output are recorded in the four evidence text files. The detailed runs are in walkthrough_evidence.json. Demo inventory and the migrated database are test fixtures.
+## Questions to practice
 
+- Why does the lowercase accented search not match the capital accented letter? The original SQLite search folds English ASCII letters only. The replacement engine follows the same rule.
+- Why is a loan ID needed for returns? It identifies the open loan when the same member has two copies.
+- Why does the test wait 25 hours past the due date? The legacy fine counts completed late days, so the expected fine is one unit.
+- What was migrated? A generated fixture with two members, three items and one loan. Database records for the university were not supplied.
+- Where is SQL now? In the storage and migration code. LendingService calls the Storage interface.
+
+The four output logs and walkthrough_evidence.json capture real runs. From a clone of the bundle with development requirements installed, Demo/screen_demo.py runs the live walkthrough in the terminal. The application can also be run from the extracted ZIP using the README.

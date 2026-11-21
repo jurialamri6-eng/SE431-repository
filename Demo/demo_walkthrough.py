@@ -12,6 +12,7 @@ import tempfile
 from datetime import date
 from hashlib import sha256
 from pathlib import Path
+from typing import Callable
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -45,7 +46,10 @@ def read_prompt(stream, expected: str) -> str:
             return "".join(chunks)
 
 
-def record_session(source: Path, args: list[str], groups: list, noun: str) -> dict:
+def record_session(
+    source: Path, args: list[str], groups: list, noun: str,
+    on_step: Callable[[dict], None] | None = None,
+) -> dict:
     cmd = [sys.executable, "-u", "-m", *args]
     captures = []
     try:
@@ -71,6 +75,8 @@ def record_session(source: Path, args: list[str], groups: list, noun: str) -> di
                 pending = read_prompt(process.stdout, "Choice: ")
                 output, menu = pending.rsplit("\nLIBRARY\n", 1)
                 captures.append({"step": label, "text": text + output.rstrip() + "\n"})
+                if on_step is not None:
+                    on_step(captures[-1])
                 pending = "\nLIBRARY\n" + menu
             process.stdin.write("4\n")
             process.stdin.flush()

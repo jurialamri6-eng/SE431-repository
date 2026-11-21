@@ -19,6 +19,12 @@ from docx.shared import Inches, Pt, RGBColor
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "Report" / "SE431_Final_Report.docx"
 METRICS = json.loads((ROOT / "Evidence" / "quality_metrics.json").read_text(encoding="utf-8"))
+REVIEW = json.loads((ROOT / "Documentation" / "review_status.json").read_text(encoding="utf-8-sig"))
+TEAM = REVIEW["team"]
+REPO = REVIEW["repository"]
+TEAM_MEMBERS = ", ".join(f"{m['name']} ({m['id']})" for m in TEAM["members"]) or "Not supplied"
+COMMIT_COUNT = REPO["original_stages"] + REPO["review_commits"]
+REPOSITORY = REPO["url"] or "Repository link not supplied"
 
 NAVY = "115981"
 TEAL = "13BBB7"
@@ -301,7 +307,7 @@ def _cover(document: Document) -> None:
         ("Fall 2026 Course Project", 11, TEAL, True),
         ("Legacy Library System", 19, NAVY, True),
         ("Maintenance, Refactoring, and Reengineering", 13, GRAY, False),
-        ("Student Project Report", 11, GRAY, False),
+        ("Project Report | Review Copy", 11, GRAY, False),
     ):
         p = document.add_paragraph()
         p.alignment = WD_ALIGN_PARAGRAPH.CENTER
@@ -316,16 +322,16 @@ def _cover(document: Document) -> None:
         document,
         ["Project information", "Value"],
         [
-            ["Team number", "[TO BE PROVIDED]"],
-            ["Team members (3–4 names and university IDs)", "[TO BE PROVIDED]"],
-            ["Instructor / supervisor", "[TO BE PROVIDED]"],
-            ["Review date", "19 November 2026"],
+            ["Team number", TEAM["number"] or "Not supplied"],
+            ["Team members (3–4 names and university IDs)", TEAM_MEMBERS],
+            ["Instructor / supervisor", TEAM["instructor"] or "Not supplied"],
+            ["Review date", REVIEW["review_date"]],
         ],
         [2.7, 3.8],
     )
     note = document.add_paragraph()
     note.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    run = note.add_run("Complete the team fields and add genuine group-work records before submission.")
+    run = note.add_run("Team information and contribution records are listed in Appendix C.")
     run.italic = True
     run.font.size = Pt(9)
     run.font.color.rgb = RGBColor.from_string(GRAY)
@@ -361,8 +367,8 @@ def build() -> None:
     test_count = tests.group(1)
 
     _heading(doc, "1. Introduction and Decision", 1)
-    _p(doc, "This project studies and updates the Python library program supplied with SE431. The program uses a terminal menu to search, borrow and return books. We chose to maintain and reengineer it because the six core rules were already present, while its single script made changing those rules and replacing SQLite difficult. Keeping the working rules and separating the code was enough to meet both change requests [1], [2].")
-    _p(doc, "The source text lost indentation and contains an invalid module guard. We kept the supplied text and made a separate executable copy by restoring syntax and the entry point. The analysis follows the original function calls, SQL statements and data updates. We used the executable copy to check legacy behavior on sample data [2], [8].")
+    _p(doc, "This project studies and updates the Python library program supplied with SE431. The program uses a terminal menu to search, borrow and return books. The decision was to maintain and reengineer it because the six core rules were already present, while its single script made changing those rules and replacing SQLite difficult. Keeping the working rules and separating the code was enough to meet both change requests [1], [2].")
+    _p(doc, "The source text lost indentation and contains an invalid module guard. A separate executable copy repairs indentation and the entry point. The supplied text remains in Git. The analysis follows the original function calls, SQL statements and data updates. The executable copy provided the baseline for testing on sample data [2], [8].")
 
     _heading(doc, "2. Phase 1: Program Comprehension", 1)
     _heading(doc, "2.1 Requirements and Business Rules", 2)
@@ -386,7 +392,7 @@ def build() -> None:
     ], [1.27, 3.17, 2.50])
     _p(doc, "Figure 1 shows how the console reaches the database. All operations share a SQLite connection. The members table stores identity and status. Books stores title, author and availability. Loans stores the member and book IDs, two dates and the returned flag. Foreign keys are implied by the SQL but are absent from the original table declarations.")
     _p(doc, "For example, borrowing reads a member and a book before writing an ISO date string to the loans table. Returning reads that date and reopens availability. If the book update failed after the loan write, the original code had no explicit rollback path to handle the error.")
-    _p(doc, "We identified six problems. The long borrow function mixes eligibility, dates, SQL and messages. Console output is mixed with business steps. SQL is spread across four functions. Loan limits and dates are hard-coded. Positional tuples tie code to column order. Book availability duplicates state carried by open loans. These problems increase the work needed to change storage and make parts of the program difficult to test on their own.")
+    _p(doc, "The review identified six problems. The long borrow function mixes eligibility, dates, SQL and messages. Console output is mixed with business steps. SQL is spread across four functions. Loan limits and dates are hard-coded. Positional tuples tie code to column order. Book availability duplicates state carried by open loans. These problems increase the work needed to change storage and make parts of the program difficult to test on their own.")
 
     _heading(doc, "3. Phase 2: Maintenance Requests", 1)
     _heading(doc, "3.1 MR-01: Multiple Book Copies", 2)
@@ -395,7 +401,7 @@ def build() -> None:
 
     _heading(doc, "3.2 MR-02: Replace the Database", 2)
     _p(doc, "MR-02 is adaptive maintenance. It changes the storage engine while keeping the book rules [3]. The design gives the service one storage interface. SQLite and DuckDB implement its operations. Startup selects one engine, so a request writes to one database. Figure 3 shows the boundary between the console, the service and the adapters [5], [6].")
-    _p(doc, "The change affects database setup, every operation that reads or writes data, and all three original tables. Migration maps members, books and loans to the new schema. It preserves IDs and dates, checks counts and stock, and writes to a separate empty destination. The old Boolean flag cannot reveal how many copies were purchased, so a verified inventory is needed in ambiguous cases. We tested migration with databases built from the legacy schema. The supplied files did not contain a live library database.")
+    _p(doc, "The change affects database setup, every operation that reads or writes data, and all three original tables. Migration maps members, books and loans to the new schema. It preserves IDs and dates, checks counts and stock, and writes to a separate empty destination. The old Boolean flag cannot reveal how many copies were purchased, so a verified inventory is needed in ambiguous cases. Migration was tested with databases built from the legacy schema. The supplied files did not contain a live library database.")
     _p(doc, "Both bonus changes are implemented. SQLite supported the search, two borrows, rejection and return in Figure 2. DuckDB supported the same book walkthrough and the equipment demonstration. In a migration rehearsal, the command reported two members, three items and one loan. A file hash matched before and after migration. This demonstrated the importer on one complete fixture. DuckDB writes in this console program are coordinated within a single process.")
 
     _heading(doc, "4. Phase 3: Refactoring", 1)
@@ -419,18 +425,22 @@ def build() -> None:
     _p(doc, "Figure 4 shows the two policies using the common service. The equipment values are examples in the configuration file. A laptop, projector, camera or lab instrument uses the same operations with its own metadata. The project uses sample inventory because the course handout leaves equipment rules and inventory open.")
 
     _heading(doc, "6. Phase 5: Quality Evaluation", 1)
-    _p(doc, "We counted lines per Python file, used Python AST for function and class counts, and used Radon 6.0.1 for cyclomatic complexity [7]. The original column uses the normalized code. The final column covers the running package and excludes tests. Code smells and database dependencies were checked by reading the code.")
-    _table(doc, ["Measure", "Legacy", "Final"], [
-        ["Physical / logical LOC", f"{old['loc']} / {old['lloc']}", f"{final['loc']} / {final['lloc']}"],
-        ["Functions / classes", f"{old['function_count']} / {old['class_count']}", f"{final['function_count']} / {final['class_count']}"],
-        ["Average / maximum complexity", f"{old['cyclomatic']['average']} / {old['cyclomatic']['maximum']}", f"{final['cyclomatic']['average']} / {final['cyclomatic']['maximum']}"],
-        ["borrow() complexity", str(old["cyclomatic"]["borrow"]), str(final["cyclomatic"]["borrow"])],
-        ["Named code smells", "6 reviewed", "5 addressed, 1 remaining"],
-        ["Database dependencies", "4 original functions issue SQL", "0 in LendingService. SQL and driver code sit in the repository, adapters and migration utility."],
-    ], [2.48, 1.48, 2.98])
-    _p(doc, f"Borrowing complexity falls from {before['cyclomatic']['borrow']} to {final['cyclomatic']['borrow']} compared with the post-maintenance prototype. Maximum complexity falls from {before['cyclomatic']['maximum']} to {final['cyclomatic']['maximum']} on that same comparison. Code size grows because the final program includes the adapters, data models, policies and migration. The remaining smell is the stored availability count alongside open loans. Transactions keep the two values in agreement.")
-    _p(doc, f"The current run passed {test_count} tests. It covers both engines, book rules, fine rounding, open loan limits, concurrent requests for the last copy, rollback, equipment and migration. The code and measurements are in Source_Code, and the execution and quality records are in Evidence and Demo.")
-    _p(doc, "The concurrency checks address two different risks. In one case, two requests compete for the last available copy. In the other, two requests would take the same member beyond the three-loan limit. In both cases only one request can succeed. The failure test checks that stock and the loan record are restored when an update fails.")
+    _p(doc, "Python AST counts functions and classes. Radon 6.0.1 counts physical and logical lines and measures cyclomatic complexity [7]. The three columns cover the normalized legacy script, the maintenance prototype and the corrected final package. Test code is outside the measurements.")
+    stages = (old, before, final)
+    _table(doc, ["Automated measure", "Legacy", "After Maintenance", "After Refactoring"], [
+        ["Physical LOC", *[str(stage["loc"]) for stage in stages]],
+        ["Logical LOC", *[str(stage["lloc"]) for stage in stages]],
+        ["Functions / classes", *[f"{stage['function_count']} / {stage['class_count']}" for stage in stages]],
+        ["Mean / max complexity", *[f"{stage['cyclomatic']['average']} / {stage['cyclomatic']['maximum']}" for stage in stages]],
+        ["borrow() complexity", *[str(stage["cyclomatic"]["borrow"]) for stage in stages]],
+    ], [2.10, 1.22, 1.81, 1.81])
+    _p(doc, "The final package has more lines because the design adds adapters, named records, configuration and migration. The manual code smell review recorded six issues in the legacy version and one remaining issue in the final design. Stored stock and open loans still have to agree. Transactions protect that agreement. The maintenance prototype was used for the automated comparison.")
+    _p(doc, "The legacy script issues SQL from four functions. The maintenance prototype still mixes SQL with borrowing rules. The final LendingService works through Storage. SQL remains in the repository, adapters and migration utility.")
+    _p(doc, f"The verified suite passed {test_count} tests. It covers the three-book limit, membership, the 14-day term, fines, stock and concurrency, including rollback after a failed stock update. Both engine runs checked a return that fails partway and a second attempt to return the same loan.")
+
+    _heading(doc, "6.1 Corrections Checked on Both Engines", 2)
+    _p(doc, "DuckDB lowercased accented letters that the original SQLite search kept distinct. With an École test record, each engine now finds École and returns no match for école. DuckDB folds only ASCII letters. Title and author search, percent and underscore wildcards, and empty searches keep the legacy behavior.")
+    _p(doc, "The returned loan record used to keep the open flag after the database update. The repository now passes the updated flag back to the service. Tests compare the returned value to the saved row, verify the one-day fine and check that a second return leaves stock unchanged. The setup guide now installs the development requirements before running Radon.")
 
     _heading(doc, "7. Phase 6: Git History", 1)
     _table(doc, ["Stage", "Evidence of evolution"], [
@@ -439,23 +449,16 @@ def build() -> None:
         ["03", "Multiple copies, DuckDB and a migration prototype."],
         ["04", "Refactored borrowing and isolated storage."],
         ["05", "Equipment reuse analysis and shared domain examples."],
-        ["06", "Final command, tests, measurements and delivery files."],
+        ["06", "Final command, tests, measurements and original delivery files."],
+        ["07", "Legacy search parity, returned loan state and developer setup."],
+        ["08", "Updated evidence, documents and terminal screen recording."],
     ], [1.12, 5.82])
-    _p(doc, "The Git bundle contains six commits in this order. Clone it to inspect the actual changes between stages. The shared repository link is pending and is needed for submission.")
+    _p(doc, f"The bundle contains {COMMIT_COUNT} commits. The six course stages stay in order and two later commits record the review changes. The screen recording shows the technical fix before the delivery update was committed. Git retains the Codex authorship. {REPOSITORY}.")
 
     _heading(doc, "8. Project Management and Learning", 1)
-    _p(doc, "The objective was to understand the old program, implement the two maintenance requests, refactor borrowing and prepare evidence of the result. The Git stages track when work was recorded. The software resources were the legacy Python code, the course handout, SQLite, DuckDB, Git and Radon. The diagrams, report and presentation use diagrams.net, Word and PowerPoint.")
-    _table(doc, ["Milestone", "Evidence or next action", "Status"], [
-        ["1–2: Analysis", "Rules, initial architecture and impact analysis", "Recorded in 01–02"],
-        ["3–5: Implementation", "Maintenance, refactoring and equipment reuse", "Recorded in 03–05"],
-        ["6: Validation", "Both engines, regression checks and package", "Locally verified"],
-        ["Team review", "Assign owners, verify contributions and rehearse Q&A", "Planned by 21 November"],
-        ["Delivery", "Share repository link and submit ZIP in Teams", "Due 22 November, 11:59 PM"],
-    ], [1.53, 3.50, 1.91])
-    _p(doc, "The old source could not run directly, so we separated the syntax repair. Stock and loan records could get out of step, so we tested transaction rollback and competing requests. With no source database, we created fixtures and checked migration on those. Each remaining task needs an assigned team member and a record of when it was done.")
-    _p(doc, "The group record should identify the date and attendance, which idea or solution each member contributed, the communication tool, what feedback was exchanged and the decision or follow-up. This evidence and individual task ownership are pending team input.")
-    _p(doc, "The final review should match the running package to the Word report, opening each figure, checking the repository link and replaying the demonstration. The reviewer can record the result beside each item in the delivery checklist for the submitter.")
-    _p(doc, "The technical gaps were transaction handling, extracting behavior from a long function and measuring complexity. The SQLite and DuckDB documentation informed the storage adapters [5], [6]. Fowler's refactoring examples informed the named checks and smaller responsibilities [4]. Radon documentation helped separate the change in code size from the change in complexity [7]. During discussion, each member should be ready to explain these choices and show the terminal output.")
+    _p(doc, "The objective was to understand the legacy program, address both maintenance requests, refactor the code and collect evidence. The plan follows the six course stages. Git records progress while the logs and diagrams document what was checked. Appendix C lists resources, planned and recorded dates, task status and proof. Dates from Git record when work was checked in. Team assignments need the team's own records.")
+    _p(doc, "The syntax repair made the initial program runnable. The multiple-copy change raised a stock risk, so the suite tests competing requests and transaction rollback. The migration uses fixtures because the source database was absent. The course handout sets the Teams deadline at 22 November 2026, 11:59 PM. The team review should check member contributions, rehearse the discussion and confirm access to the repository.")
+    _p(doc, "The technical gaps were transaction handling, extracting behavior from a long function and measuring complexity. The database documentation informed the adapters and the migration checks [5], [6]. Fowler's examples informed the named checks and smaller responsibilities [4]. Radon helps compare changes in code size and complexity [7]. The team can explain these choices alongside the live terminal recording.")
 
     _heading(doc, "9. Conclusion", 1)
     _p(doc, "The updated console program keeps the original book rules, supports more than one copy and runs with either database engine. Splitting console input, lending rules and storage made the system easier to change and enabled equipment reuse. The final evidence includes the measurements, ordered Git history and a recorded demo. Team records, the shared repository link and Teams submission remain to be completed.")
@@ -486,8 +489,8 @@ def build() -> None:
     _p(doc, "From Source_Code, run the command below for the SQLite book system.")
     _p(doc, "`python -m library_system --engine sqlite --database ../runtime/library.sqlite3`")
     _p(doc, "Use `--engine duckdb` with a separate database path for DuckDB. Add `--item-type equipment` for the equipment demonstration. The root README has installation, run and migration instructions.")
-    _p(doc, "Shared Git repository: [add the team repository URL before submission]. The local history can be cloned from Git/SE431-project.bundle.")
-    _p(doc, "Team contribution record: [date, participants, contribution, communication tool, feedback and follow-up]. Add the task owner and completion date for each actual handoff.")
+    _p(doc, f"{REPOSITORY}. The local history can be cloned from Git/SE431-project.bundle.")
+    _p(doc, "The base suite and the corrected suite were executed in a new environment. Evidence contains the runtime-only Radon error, the before and after defect checks, the current test log and the measurement output.")
 
     diagrams = ROOT / "Drawio_Diagrams"
     figures = (
@@ -499,9 +502,28 @@ def build() -> None:
     for number, (title, caption, stem) in enumerate(figures, start=1):
         _add_landscape_figure(doc, title, caption, number, diagrams / f"{stem}.png")
 
+    doc.add_page_break()
+    _heading(doc, "Appendix C: Project and Team Records", 1)
+    _p(doc, "Recorded dates and sources identify the local artifacts. Team members can add evidence of individual responsibility and feedback before submission.")
+    _table(doc,
+           ["Task", "Actual owner", "Resources", "Planned date", "Recorded date", "Status", "Evidence"],
+           [[task[key] or "Not supplied" for key in (
+               "task", "owner", "resources", "planned", "actual", "status", "evidence"
+           )] for task in REVIEW["tasks"]],
+           [1.7, 1.24, 1.68, 1.17, 1.2, 1.23, 1.65])
+    _heading(doc, "C.1 Collaboration Record", 2)
+    _table(doc,
+           ["Date", "Participants", "Contribution by member", "Communication tool", "Feedback", "Decision / follow-up"],
+           [[entry[key] for key in ("date", "participants", "contributions", "channel", "feedback", "follow_up")]
+            for entry in REVIEW["collaboration"]],
+           [1.0, 1.5, 2.0, 1.65, 1.66, 2.0])
+    if not REVIEW["collaboration"]:
+        _p(doc, "The team has not supplied meeting dates, attendance, contributions or feedback.")
+    _p(doc, "Git records earlier and review assistance under its actual author. The team's contribution record should identify the work its members did and follow the course policy on originality and permitted assistance.")
+
     doc.core_properties.title = "SE431 Legacy Library System: Final Project Report"
     doc.core_properties.subject = "Software maintenance, refactoring and reengineering"
-    doc.core_properties.author = "SE431 Project Team"
+    doc.core_properties.author = "SE431 review copy"
     doc.save(OUT)
     print(f"Saved {OUT}. Main report word count, including tables: {word_count}")
 
