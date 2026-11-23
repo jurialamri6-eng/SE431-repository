@@ -1,86 +1,84 @@
-# SE431 Legacy Library Reengineering
+# SE431 Library System
 
-This repository contains the SE431 Fall 2026 library system analysis, maintenance implementation, refactoring, reuse design, quality measurements, and delivery artifacts.
+## Team
 
-This is the 22 November review copy. Team details, contribution records, the shared repository link and Teams submission are awaiting team input.
+| Student | University ID | Assigned share of final review |
+| --- | --- | --- |
+| Nada Faisal | 4320021 | 50% |
+| Juri Alamri | 4311905 | 50% |
 
-## What is implemented
+Appendix C of the report lists six paired review tasks, with one responsibility for each student in every pair.
 
-- **MR-01:** copy counts, atomic borrowing and returns, and loan-ID selection when the same member has multiple loans for a title.
-- **MR-02:** SQLite remains supported; DuckDB is a real alternate backend. A setting selects the engine, and a one-way importer preserves legacy IDs and dates while checking migrated data.
-- **Phase 3:** `LendingService` holds the lending rules, the console stays in `cli.py`, and repository rows map to named records. The default book menu matches the post-maintenance book workflow on both engines.
-- **Phase 4:** book and equipment borrowing share the same item, loan, policy, service, and storage contracts. Equipment policy and inventory examples are explicitly labeled demo values.
-- **Phase 5:** `Source_Code/tools/quality_metrics.py` measures the normalized legacy executable and production package with Radon 6.0.1 and Python AST. The output is `Evidence/quality_metrics.json`.
-- **Review fixes:** searches on both engines follow the original SQLite matching rules. A successful return supplies a loan record marked returned, matching the stored row.
+## Setup
 
-## Requirements
-
-- Python 3.11 or newer.
-- SQLite ships with Python. DuckDB is pinned in `Source_Code/requirements.txt`.
-
-From the repository root in PowerShell:
+Use Python 3.11 or newer. Open PowerShell in the extracted project folder:
 
 ```powershell
 py -3 -m venv .venv
-.\.venv\Scripts\python.exe -m pip install -r Source_Code\requirements.txt
+.\.venv\Scripts\python.exe -m pip install -r Source_Code\dev-requirements.txt
 Set-Location Source_Code
+```
+
+This installs DuckDB and the Radon measurement tool. SQLite is included with Python. The following commands assume that the current folder is `Source_Code`.
+
+## Run the book system
+
+```powershell
 ..\.venv\Scripts\python.exe -m library_system --engine sqlite --database ..\runtime\library.sqlite3
 ```
 
-Choose menu options 1 to search, 2 to borrow, 3 to return and 4 to exit. Try Clean Code (book ID `1`) as member `S1` in the sample data.
+For DuckDB, use a separate database file:
 
-Use `--engine duckdb` and a separate `.duckdb` path for DuckDB. Add `--item-type equipment` to switch to the equipment menu. On an empty database the CLI loads demonstration members, books and equipment.
+```powershell
+..\.venv\Scripts\python.exe -m library_system --engine duckdb --database ..\runtime\library.duckdb
+```
+
+The menu has search, borrow, return and exit options. An empty database receives sample data. Try member `S1` and book `1`, Clean Code. When a member has two open loans for the same title, select the loan ID to return the correct loan.
+
+Add `--item-type equipment` to either command to use the equipment example. Its inventory and policy values are demonstration settings.
 
 ## Tests and measurements
 
-For tests, measurements and document rebuilds, install the development requirements into the same environment. From the repository root:
-
 ```powershell
-.\.venv\Scripts\python.exe -m pip install -r Source_Code\dev-requirements.txt
-```
-
-Run the direct checks from the repository root:
-
-```powershell
-.\.venv\Scripts\python.exe Demo\demo_regressions.py
-```
-
-From the repository root, enter `Source_Code` and run the suite and metrics:
-
-```powershell
-Set-Location Source_Code
 ..\.venv\Scripts\python.exe -m unittest discover -s tests -v
 ..\.venv\Scripts\python.exe tools\quality_metrics.py
 ```
 
-The development file includes the runtime requirements and Radon. The suite covers both engines, concurrency, search, fines, dates, rollback, equipment and migration. It checks accented search against the original SQLite behavior and compares the returned loan with its stored state. The original source text is preserved alongside the separate syntax repair.
+The supplied source passes 33 tests. SQLite and DuckDB keep the same accented-search behavior. A successful return reports `returned=True`, and a repeated return leaves stock unchanged.
 
-## Legacy migration
+The final source measures 888 physical lines and 598 logical lines, with 74 functions and 12 classes. The complexity of `borrow()` is 5. The measurement script excludes test code and writes `Evidence/quality_metrics.json` in the project folder.
 
-The migration accepts a separate source SQLite database and destination. It never overwrites the source. Because the legacy `available` flag does not reveal purchased copy quantities, provide verified `book_id,total_copies` values when a title has more than one copy. Example:
+`Evidence/test-results.txt`, `Evidence/quality_metrics.json` and `Evidence/correction-checks.txt` contain the current verification results. To save a new test log:
 
 ```powershell
+New-Item -ItemType Directory -Force ..\Evidence | Out-Null
+..\.venv\Scripts\python.exe -m unittest discover -s tests -v 2>&1 | Tee-Object -FilePath ..\Evidence\test-results.txt
+```
+
+## Migration
+
+Migration reads a separate legacy SQLite database and writes to an empty destination without changing the source. It preserves IDs and dates and checks record counts and stock. Tests use sample databases based on the original schema.
+
+The old availability flag does not show the number of purchased copies. Supply checked `book_id,total_copies` values when needed. The following example uses source files that you supply in `incoming/`:
+
+```powershell
+New-Item -ItemType Directory -Force ..\runtime | Out-Null
 ..\.venv\Scripts\python.exe -m library_system.migration ..\incoming\legacy.sqlite ..\runtime\migrated.duckdb --engine duckdb --inventory-csv ..\incoming\verified_inventory.csv
 ```
 
-No original legacy database was included with the supplied source code, so migration tests use generated fixtures following the documented legacy schema. The migration's behavior against a real university database has not been claimed.
+## Contents
 
-## Project artifacts
+- `Source_Code/`: application, policy settings, tests, the original source, runnable legacy copy, maintenance baseline and measurement tool.
+- `Report/SE431_Final_Report.docx`: editable report.
+- `Presentation/SE431_Presentation.pptx`: presentation using the university template.
+- `Demo/SE431_Demo.mp4`: terminal demonstration.
+- `Drawio_Diagrams/`: editable diagram source and four PNG diagrams.
+- `Evidence/`: current tests, measurements and regression checks.
+- `Git/SE431-project.bundle`: complete local history.
+- `Git/UPLOAD_GUIDE.md`: steps to upload the saved history to GitHub in one push.
 
-- `Documentation/` — Phase 1–2 analysis and Phase 4 design.
-- `Report/` — final editable Word report with an automatic table of contents, refreshed PDF, and the University of Prince Mugrin logo.
-- `Presentation/` — editable student presentation based on the official UPM PowerPoint template.
-- `Demo/` — screen recording of the live terminal with narration, guide and transcripts for both engines.
-- `Drawio_Diagrams/` — editable diagrams.net source, four project diagrams on Pages 3–6, the supplied pages and a vector PDF for reading.
-- `Evidence/` — assignment text extraction, test output, and quality metrics.
-- `Git/` — cloneable local bundle with the six original stages and the two review commits.
-- `Final_Checklist.md` — requirements-to-evidence checklist, including pending team details.
-- `Documentation/review_status.json` — confirmed project dates and the shared team, task and collaboration fields used to build the report and slides.
+## GitHub and final details
 
-To rebuild the report, run `..\.venv\Scripts\python.exe build_report.py` from `Report`, then run `..\.venv\Scripts\python.exe refresh_docx_fields.py`. This refreshes the automatic contents and page fields with installed Microsoft Word, saves the DOCX, and exports the matching PDF with LibreOffice.
+The history retains the six original project stages and the later review changes. Follow `Git/UPLOAD_GUIDE.md` to clone the bundle and upload it to an empty repository. One push can transfer the full saved history. The earlier commit dates are recorded change dates, not evidence of earlier GitHub uploads.
 
-## Before submission
-
-The shared repository link has not been supplied. The local history can be cloned with `git clone Git/SE431-project.bundle SE431-history`. The earlier commit authorship is retained, including Codex-assisted work.
-
-Enter the team number, 3–4 member names and IDs, instructor name and genuine contribution records. Confirm that the instructor can open the repository link. Rename the ZIP using the team number and submit to Microsoft Teams by 22 November 2026 at 11:59 PM. See `Final_Checklist.md` for the complete review.
+Add the real repository URL to the report and presentation after the upload. Enter the team number and instructor name in the cover fields, name the archive `SE431-Project-Fall 26-TeamNo.zip` and replace `TeamNo` with the real team number, and confirm the instructor can open the repository. Team members should complete the collaboration record using their actual review notes.

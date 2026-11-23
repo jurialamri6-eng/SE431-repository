@@ -1,10 +1,10 @@
 {
-  "measured_on": "2026-11-22",
+  "measured_on": "2026-11-24",
   "tool": "Radon 6.0.1; Python AST for function/class/SQL counts",
   "scope": "File-by-file counts for normalized legacy code, the post-maintenance snapshot, and the final library_system package. Tests excluded.",
   "legacy": {
     "files": [
-      "Source_Code\\legacy\\legacy_system_executable.py"
+      "Source_Code/legacy/legacy_system_executable.py"
     ],
     "loc": 218,
     "lloc": 100,
@@ -48,7 +48,7 @@
   },
   "post_maintenance_pre_refactor": {
     "files": [
-      "Source_Code\\pre_refactor_system.py"
+      "Source_Code/pre_refactor_system.py"
     ],
     "loc": 411,
     "lloc": 230,
@@ -92,17 +92,17 @@
   },
   "reengineered": {
     "files": [
-      "Source_Code\\library_system\\__init__.py",
-      "Source_Code\\library_system\\__main__.py",
-      "Source_Code\\library_system\\cli.py",
-      "Source_Code\\library_system\\duckdb_repository.py",
-      "Source_Code\\library_system\\factory.py",
-      "Source_Code\\library_system\\migration.py",
-      "Source_Code\\library_system\\models.py",
-      "Source_Code\\library_system\\repository.py",
-      "Source_Code\\library_system\\service.py",
-      "Source_Code\\library_system\\sqlite_repository.py",
-      "Source_Code\\library_system\\storage.py"
+      "Source_Code/library_system/__init__.py",
+      "Source_Code/library_system/__main__.py",
+      "Source_Code/library_system/cli.py",
+      "Source_Code/library_system/duckdb_repository.py",
+      "Source_Code/library_system/factory.py",
+      "Source_Code/library_system/migration.py",
+      "Source_Code/library_system/models.py",
+      "Source_Code/library_system/repository.py",
+      "Source_Code/library_system/service.py",
+      "Source_Code/library_system/sqlite_repository.py",
+      "Source_Code/library_system/storage.py"
     ],
     "loc": 888,
     "lloc": 598,
