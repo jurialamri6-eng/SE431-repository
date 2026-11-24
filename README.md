@@ -69,16 +69,8 @@ New-Item -ItemType Directory -Force ..\runtime | Out-Null
 ## Contents
 
 - `Source_Code/`: application, policy settings, tests, the original source, runnable legacy copy, maintenance baseline and measurement tool.
-- `Report/SE431_Final_Report.docx`: editable report.
-- `Presentation/SE431_Presentation.pptx`: presentation using the university template.
 - `Demo/SE431_Demo.mp4`: terminal demonstration.
 - `Drawio_Diagrams/`: editable diagram source and four PNG diagrams.
 - `Evidence/`: current tests, measurements and regression checks.
-- `Git/SE431-project.bundle`: complete local history.
-- `Git/UPLOAD_GUIDE.md`: steps to upload the saved history to GitHub in one push.
 
-## GitHub and final details
-
-The history retains the six original project stages and the later review changes. Follow `Git/UPLOAD_GUIDE.md` to clone the bundle and upload it to an empty repository. One push can transfer the full saved history. The earlier commit dates are recorded change dates, not evidence of earlier GitHub uploads.
-
-Add the real repository URL to the report and presentation after the upload. Enter the team number and instructor name in the cover fields, name the archive `SE431-Project-Fall 26-TeamNo.zip` and replace `TeamNo` with the real team number, and confirm the instructor can open the repository. Team members should complete the collaboration record using their actual review notes.
+https://github.com/jurialamri6-eng/SE431-repository/
